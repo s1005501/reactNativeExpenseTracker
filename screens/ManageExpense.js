@@ -1,5 +1,4 @@
-import { View, Text } from "react-native";
-import React from "react";
+import { View, Text, StyleSheet } from "react-native";
 
 const ManageExpense = () => {
     return (
@@ -10,3 +9,5 @@ const ManageExpense = () => {
 };
 
 export default ManageExpense;
+
+const styles = StyleSheet.create({});

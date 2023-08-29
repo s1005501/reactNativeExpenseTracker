@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -9,6 +9,7 @@ import ManageExpense from "./screens/ManageExpense";
 import RecentExpenses from "./screens/RecentExpenses";
 import AllExpenses from "./screens/AllExpenses";
 import { GlobalStyles } from "./constants/style";
+import IconButton from "./UI/IconButton";
 
 const Stack = createNativeStackNavigator();
 const BottomTabs = createBottomTabNavigator();
@@ -17,7 +18,8 @@ const BottomTabs = createBottomTabNavigator();
 const ExpenseOverView = () => {
     return (
         <BottomTabs.Navigator
-            screenOptions={{
+            // 這裡也可以回傳function，好處是可以拿到參數，比如有綁定在Screen時，又可以透過這種方式解構取得route、navigation
+            screenOptions={({ navigation }) => ({
                 headerStyle: {
                     backgroundColor: GlobalStyles.colors.primary500,
                 },
@@ -26,7 +28,19 @@ const ExpenseOverView = () => {
                     backgroundColor: GlobalStyles.colors.primary500,
                 },
                 tabBarActiveTintColor: GlobalStyles.colors.accent500,
-            }}
+                headerRight: ({ tintColor }) => {
+                    return (
+                        <IconButton
+                            icon="add"
+                            size={24}
+                            color={tintColor}
+                            onPress={() => {
+                                navigation.navigate("ManageExpense");
+                            }}
+                        />
+                    );
+                },
+            })}
         >
             <BottomTabs.Screen
                 name="RecentExpenses"
@@ -81,6 +95,9 @@ export default function App() {
                     <Stack.Screen
                         name="ManageExpense"
                         component={ManageExpense}
+                        options={{
+                            presentation: "modal",
+                        }}
                     />
                 </Stack.Navigator>
             </NavigationContainer>
@@ -89,3 +106,5 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({});
+
+// 作者是先把結構畫面都寫好再考慮到邏輯的部份
