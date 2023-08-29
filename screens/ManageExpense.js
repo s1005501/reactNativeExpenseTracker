@@ -1,6 +1,9 @@
 import { View, Text, StyleSheet } from "react-native";
 
-const ManageExpense = () => {
+const ManageExpense = ({ route }) => {
+    const editedExpenseId = route.params?.expenseId;
+
+
     return (
         <View>
             <Text>ManageExpense</Text>

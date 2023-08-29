@@ -4,11 +4,14 @@ import { useNavigation } from "@react-navigation/native";
 import { GlobalStyles } from "../../constants/style";
 import { getFormattedData } from "../../util/date";
 
-const ExpenseItem = ({ description, amount, date }) => {
+const ExpenseItem = ({ id, description, amount, date }) => {
     const navigation = useNavigation();
 
     const expensePressHandler = () => {
-        navigation.navigate("ManageExpense");
+        // 要傳資料過去是因為這是要編輯，要知道要編輯哪一個資料
+        navigation.navigate("ManageExpense", {
+            expenseId: id,
+        });
     };
 
     return (
