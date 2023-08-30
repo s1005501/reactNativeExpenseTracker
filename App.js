@@ -84,7 +84,18 @@ export default function App() {
         <>
             <StatusBar style="auto" />
             <NavigationContainer>
-                <Stack.Navigator screenOptions={{}}>
+                <Stack.Navigator
+                    screenOptions={{
+                        headerStyle: {
+                            backgroundColor: GlobalStyles.colors.primary500,
+                        },
+                        headerTintColor: "#fff",
+                        tabBarStyle: {
+                            backgroundColor: GlobalStyles.colors.primary500,
+                        },
+                        tabBarActiveTintColor: GlobalStyles.colors.accent500,
+                    }}
+                >
                     <Stack.Screen
                         name="ExpenseOverView"
                         component={ExpenseOverView}

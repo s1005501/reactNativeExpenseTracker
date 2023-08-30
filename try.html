@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        <script>
+            const a = [
+                { id: 1, name: "a1", age: 2 },
+                { id: 2, name: "a2", age: 2 },
+            ];
+
+            const atry = ({...data}) => {
+                return a.map((v, i) => {
+                    if (v.id === data.id) {
+                        // 這樣更新可以是可以但寫的有點死
+                        // return { ...v, name: data.name, age: data.age };
+                        return { ...v,};
+                    }
+                    return { ...v };
+                });
+            };
+
+            console.log(atry({ id: 2, name: "a3", age: 3 }));
+        </script>
+    </body>
+</html>
