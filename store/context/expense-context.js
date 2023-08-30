@@ -71,7 +71,6 @@ export const ExpensesContext = createContext({
     updateExpense: (id, { description, amount, date }) => {},
 });
 
-//
 const expensesReducer = (state, action) => {
     switch (action.type) {
         case "ADD":
@@ -82,19 +81,31 @@ const expensesReducer = (state, action) => {
             const updatableExpenseIndex = state.findIndex(
                 (v) => v.id === action.payload.id
             );
+            // 透過索引拿到比對到的資料
+            const updatableExpense = state[updatableExpenseIndex];
 
-            // 資料少的話好像可以，如果資料多且傳過來的
-            state.map((v, i) => {
-                if (v.id === action.payload.id) {
-                    return { ...v, ...action.payload };
-                }
-                return { ...v };
-            });
+            // 展開原始資料並將其與傳進來的資料合併，會叫data是因為updateExpense裡dispatch裡的payload
+            const updatedItem = { ...updatableExpense, ...action.payload.data };
 
+            // 複製原資料
+            const updateExpenses = [...state];
 
-            return;
+            // 把更新過的值塞回複製過的陣列後回傳
+            updateExpenses[updatableExpenseIndex] = updatedItem;
+
+            return updateExpenses;
+
+        // update個人寫法，這種方式好像比較簡短一點
+        // state.map((v, i) => {
+        //     if (v.id === action.payload.id) {
+        //         return { ...v, ...action.payload.data };
+        //     }
+        //     return { ...v };
+        // });
         case "DELETE":
-            return;
+            return state.filter((v, i) => {
+                return v.id !== action.payload;
+            });
         default:
             return state;
     }
@@ -118,7 +129,18 @@ const ExpensesContextProvider = ({ children }) => {
         dispatch({ type: "UPDATE", payload: { id: id, data: expenseData } }),
     ];
 
-    return <ExpensesContext.Provider>{children}</ExpensesContext.Provider>;
+    const value = {
+        expenses: expensesState,
+        addExpense: addExpense,
+        deleteExpense: deleteExpense,
+        updateExpense: updateExpense,
+    };
+
+    return (
+        <ExpensesContext.Provider value={value}>
+            {children}
+        </ExpensesContext.Provider>
+    );
 };
 
 export default ExpensesContextProvider;

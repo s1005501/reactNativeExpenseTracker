@@ -12,18 +12,20 @@
                 { id: 2, name: "a2", age: 2 },
             ];
 
-            const atry = ({...data}) => {
+            const atry = ({ ...data }) => {
                 return a.map((v, i) => {
                     if (v.id === data.id) {
                         // 這樣更新可以是可以但寫的有點死
                         // return { ...v, name: data.name, age: data.age };
-                        return { ...v,};
+                        
+                        // 這樣就可以動態更新
+                        return { ...v, ...data };
                     }
                     return { ...v };
                 });
             };
 
-            console.log(atry({ id: 2, name: "a3", age: 3 }));
+            console.log(atry({ id: 2, name: "a3" }));
         </script>
     </body>
 </html>
