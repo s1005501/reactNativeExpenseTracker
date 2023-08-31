@@ -1,16 +1,20 @@
 import { View, Text, StyleSheet } from "react-native";
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useContext } from "react";
 
 import { GlobalStyles } from "../constants/style";
 import IconButton from "../UI/IconButton";
 import Button from "../UI/Button";
+import { ExpensesContext } from "../store/context/expense-context";
 
 const ManageExpense = ({ route, navigation }) => {
     const editedExpenseId = route.params?.expenseId;
     const isEditing = !!editedExpenseId;
 
+    const expensesCtx = useContext(ExpensesContext);
+
     // navigation.goBack()每個function最後都要加，即做完操作後退回去看操作結果
     const deleteExpenseHandler = () => {
+        expensesCtx.deleteExpense(editedExpenseId);
         navigation.goBack();
     };
 
@@ -19,6 +23,28 @@ const ManageExpense = ({ route, navigation }) => {
     };
 
     const confirmHandler = () => {
+        // 透過isEditing做判斷
+        // true表示是更新
+        if (isEditing) {
+            expensesCtx.updateExpense(editedExpenseId, {
+                description: "test update",
+                amount: 888.88,
+                // 這裡要用Date物件格式
+                date: new Date("1993-4-12"),
+            });
+        } else {
+        }
+
+        // false表示是新增
+        if (!isEditing) {
+            expensesCtx.addExpense({
+                description: "test add",
+                amount: 999.99,
+                // 這裡要用Date物件格式
+                date: new Date("1993-4-14"),
+            });
+            // console.log(expensesCtx.expenses);
+        }
         navigation.goBack();
     };
 
@@ -29,6 +55,7 @@ const ManageExpense = ({ route, navigation }) => {
         });
         // 實在不太懂綁navigation的用意
     }, [navigation, isEditing]);
+
     return (
         <View style={styles.container}>
             <View style={styles.buttons}>
