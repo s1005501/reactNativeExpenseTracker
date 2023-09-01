@@ -1,9 +1,8 @@
-import { View, TextInput, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { useLayoutEffect, useContext } from "react";
 
 import { GlobalStyles } from "../constants/style";
 import IconButton from "../UI/IconButton";
-import Button from "../UI/Button";
 import { ExpensesContext } from "../store/context/expense-context";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
 
@@ -12,6 +11,10 @@ const ManageExpense = ({ route, navigation }) => {
     const isEditing = !!editedExpenseId;
 
     const expensesCtx = useContext(ExpensesContext);
+
+    const selectedExpense = expensesCtx.expenses.find((v, i) => {
+        return v.id === editedExpenseId;
+    });
 
     // navigation.goBack()每個function最後都要加，即做完操作後退回去看操作結果
     const deleteExpenseHandler = () => {
@@ -23,28 +26,16 @@ const ManageExpense = ({ route, navigation }) => {
         navigation.goBack();
     };
 
-    const confirmHandler = () => {
+    const confirmHandler = (expenseData) => {
         // 透過isEditing做判斷
         // true表示是更新
         if (isEditing) {
-            expensesCtx.updateExpense(editedExpenseId, {
-                description: "test update",
-                amount: 888.88,
-                // 這裡要用Date物件格式
-                date: new Date("1993-4-12"),
-            });
+            expensesCtx.updateExpense(editedExpenseId, expenseData);
         } else {
         }
-
         // false表示是新增
         if (!isEditing) {
-            expensesCtx.addExpense({
-                description: "test add",
-                amount: 999.99,
-                // 這裡要用Date物件格式
-                date: new Date("1993-4-14"),
-            });
-            // console.log(expensesCtx.expenses);
+            expensesCtx.addExpense(expenseData);
         }
         navigation.goBack();
     };
@@ -59,19 +50,12 @@ const ManageExpense = ({ route, navigation }) => {
 
     return (
         <View style={styles.container}>
-            <ExpenseForm />
-            <View style={styles.buttons}>
-                <Button
-                    onPress={cancelHandler}
-                    mode="flat"
-                    style={styles.button}
-                >
-                    Cancel
-                </Button>
-                <Button onPress={confirmHandler} style={styles.button}>
-                    {isEditing ? "Update" : "Add"}
-                </Button>
-            </View>
+            <ExpenseForm
+                onCancel={cancelHandler}
+                onSubmit={confirmHandler}
+                defaultValues={selectedExpense}
+                submitButtonLabel={isEditing ? "Update" : "Add"}
+            />
             <View style={styles.deleteContainer}>
                 {isEditing && (
                     <IconButton
@@ -93,15 +77,6 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 24,
         backgroundColor: GlobalStyles.colors.primary800,
-    },
-    buttons: {
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    button: {
-        minWidth: 120,
-        marginHorizontal: 8,
     },
     deleteContainer: {
         marginTop: 16,
