@@ -5,6 +5,7 @@ import { GlobalStyles } from "../constants/style";
 import IconButton from "../UI/IconButton";
 import { ExpensesContext } from "../store/context/expense-context";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
+import { storeExpense } from "../util/http";
 
 const ManageExpense = ({ route, navigation }) => {
     const editedExpenseId = route.params?.expenseId;
@@ -35,6 +36,8 @@ const ManageExpense = ({ route, navigation }) => {
         }
         // false表示是新增
         if (!isEditing) {
+            // 發AJAX
+            storeExpense(expenseData);
             expensesCtx.addExpense(expenseData);
         }
         navigation.goBack();

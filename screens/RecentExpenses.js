@@ -1,9 +1,9 @@
-import { View, Text } from "react-native";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 
 import ExpensesOutput from "../components/ExpensesOutput/ExpensesOutput";
 import { ExpensesContext } from "../store/context/expense-context";
 import { getDateMinusDays } from "../util/date";
+import { fetchExpense } from "../util/http";
 
 const RecentExpenses = () => {
     const expensesCtx = useContext(ExpensesContext);
@@ -30,6 +30,15 @@ const RecentExpenses = () => {
         //     return { ...v };
         // }
     });
+
+    useEffect(() => {
+        // 為啥還要在async/await一次？是裡面要再處理資料嗎
+        const getExpense = async () => {
+            const expense = await fetchExpense();
+        };
+        getExpense();
+    }, []);
+
     return (
         <ExpensesOutput
             expensesPeriod="Last 7 days"
