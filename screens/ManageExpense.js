@@ -1,13 +1,18 @@
 import { View, StyleSheet } from "react-native";
-import { useLayoutEffect, useContext } from "react";
+import { useLayoutEffect, useContext, useState } from "react";
 
 import { GlobalStyles } from "../constants/style";
 import IconButton from "../UI/IconButton";
 import { ExpensesContext } from "../store/context/expense-context";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
-import { storeExpense } from "../util/http";
+import { storeExpense, updateExpense, deleteExpense } from "../util/http";
+import LoadingOverlay from "../UI/LoadingOverlay";
 
 const ManageExpense = ({ route, navigation }) => {
+    // 判斷loading的狀態
+    // 預設給false是因為有發api才有動作所以會是false
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const editedExpenseId = route.params?.expenseId;
     const isEditing = !!editedExpenseId;
 
@@ -18,8 +23,11 @@ const ManageExpense = ({ route, navigation }) => {
     });
 
     // navigation.goBack()每個function最後都要加，即做完操作後退回去看操作結果
-    const deleteExpenseHandler = () => {
+    const deleteExpenseHandler = async () => {
+        // 不用再把loading狀態改成false，因為最後都會觸發路由的goBack()
+        setIsSubmitting(true);
         expensesCtx.deleteExpense(editedExpenseId);
+        await deleteExpense(editedExpenseId);
         navigation.goBack();
     };
 
@@ -27,18 +35,18 @@ const ManageExpense = ({ route, navigation }) => {
         navigation.goBack();
     };
 
-    const confirmHandler = (expenseData) => {
-        // 透過isEditing做判斷
-        // true表示是更新
+    const confirmHandler = async (expenseData) => {
+        setIsSubmitting(true);
+        // 透過isEditing做判斷，true表示是更新，false表示是新增
         if (isEditing) {
             expensesCtx.updateExpense(editedExpenseId, expenseData);
-        } else {
+            await updateExpense(editedExpenseId, expenseData);
         }
-        // false表示是新增
         if (!isEditing) {
             // 發AJAX
-            storeExpense(expenseData);
-            expensesCtx.addExpense(expenseData);
+            // 拿到id在把它塞進狀態
+            const id = await storeExpense(expenseData);
+            expensesCtx.addExpense({ ...expenseData, id: id });
         }
         navigation.goBack();
     };
@@ -50,6 +58,11 @@ const ManageExpense = ({ route, navigation }) => {
         });
         // 實在不太懂綁navigation的用意
     }, [navigation, isEditing]);
+
+    // loading畫面
+    if (isSubmitting) {
+        return <LoadingOverlay />;
+    }
 
     return (
         <View style={styles.container}>

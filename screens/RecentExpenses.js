@@ -1,11 +1,17 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import ExpensesOutput from "../components/ExpensesOutput/ExpensesOutput";
 import { ExpensesContext } from "../store/context/expense-context";
 import { getDateMinusDays } from "../util/date";
 import { fetchExpense } from "../util/http";
+import LoadingOverlay from "../UI/LoadingOverlay";
 
 const RecentExpenses = () => {
+    // 用來判斷是否loading出現與否
+    // 預設給true是因為一進來就抓資料所以會是true
+    const [isFetching, setIsFetching] = useState(true);
+
+    // context
     const expensesCtx = useContext(ExpensesContext);
 
     const recentExpenses = expensesCtx.expenses.filter((v, i) => {
@@ -32,12 +38,21 @@ const RecentExpenses = () => {
     });
 
     useEffect(() => {
-        // 為啥還要在async/await一次？是裡面要再處理資料嗎
+        // 在async/await一次是因為要再處理資料
         const getExpense = async () => {
+            // 不太懂為什麼要加這行，預設不就給true了嗎
+            setIsFetching(true);
             const expense = await fetchExpense();
+            setIsFetching(false);
+            expensesCtx.setExpense(expense);
         };
         getExpense();
     }, []);
+
+    // loading畫面
+    if (isFetching) {
+        return <LoadingOverlay />;
+    }
 
     return (
         <ExpensesOutput
