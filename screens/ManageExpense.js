@@ -7,11 +7,15 @@ import { ExpensesContext } from "../store/context/expense-context";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
 import { storeExpense, updateExpense, deleteExpense } from "../util/http";
 import LoadingOverlay from "../UI/LoadingOverlay";
+import ErrorOverLay from "../UI/ErrorOverLay";
 
 const ManageExpense = ({ route, navigation }) => {
     // 判斷loading的狀態
     // 預設給false是因為有發api才有動作所以會是false
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // 錯誤狀態
+    const [error, setError] = useState();
 
     const editedExpenseId = route.params?.expenseId;
     const isEditing = !!editedExpenseId;
@@ -26,9 +30,15 @@ const ManageExpense = ({ route, navigation }) => {
     const deleteExpenseHandler = async () => {
         // 不用再把loading狀態改成false，因為最後都會觸發路由的goBack()
         setIsSubmitting(true);
-        expensesCtx.deleteExpense(editedExpenseId);
-        await deleteExpense(editedExpenseId);
-        navigation.goBack();
+        try {
+            await deleteExpense(editedExpenseId);
+            expensesCtx.deleteExpense(editedExpenseId);
+            navigation.goBack();
+        } catch (err) {
+            setError("Could not delete expense - please try again later");
+            // 要把送出狀態改成false才能判斷error畫面
+            setIsSubmitting(false);
+        }
     };
 
     const cancelHandler = () => {
@@ -38,17 +48,22 @@ const ManageExpense = ({ route, navigation }) => {
     const confirmHandler = async (expenseData) => {
         setIsSubmitting(true);
         // 透過isEditing做判斷，true表示是更新，false表示是新增
-        if (isEditing) {
-            expensesCtx.updateExpense(editedExpenseId, expenseData);
-            await updateExpense(editedExpenseId, expenseData);
+        try {
+            if (isEditing) {
+                expensesCtx.updateExpense(editedExpenseId, expenseData);
+                await updateExpense(editedExpenseId, expenseData);
+            }
+            if (!isEditing) {
+                // 發AJAX
+                // 拿到id在把它塞進狀態
+                const id = await storeExpense(expenseData);
+                expensesCtx.addExpense({ ...expenseData, id: id });
+            }
+            navigation.goBack();
+        } catch (err) {
+            setError("Could not save data - please try again!");
+            setIsSubmitting(false);
         }
-        if (!isEditing) {
-            // 發AJAX
-            // 拿到id在把它塞進狀態
-            const id = await storeExpense(expenseData);
-            expensesCtx.addExpense({ ...expenseData, id: id });
-        }
-        navigation.goBack();
     };
 
     useLayoutEffect(() => {
@@ -58,6 +73,13 @@ const ManageExpense = ({ route, navigation }) => {
         });
         // 實在不太懂綁navigation的用意
     }, [navigation, isEditing]);
+
+    const errorHandler = () => {
+        setError(null);
+    };
+    if (error && !isSubmitting) {
+        return <ErrorOverLay message={error} onConfirm={errorHandler} />;
+    }
 
     // loading畫面
     if (isSubmitting) {

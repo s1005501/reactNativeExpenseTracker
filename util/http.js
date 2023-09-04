@@ -1,6 +1,10 @@
 import axios from "axios";
 
-// 路徑
+// // 正確路徑
+// const BACKEND_URL =
+//     "https://react-native-course-36558-default-rtdb.firebaseio.com/";
+
+// 測試錯誤用的路徑
 const BACKEND_URL =
     "https://react-native-course-36558-default-rtdb.firebaseio.com/";
 
